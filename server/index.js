@@ -32,6 +32,7 @@ app.post('/api/contact', (req, res) => {
   });
 });
 
+
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(distDir));
   app.get('*', (req, res) => {
