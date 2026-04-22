@@ -1,56 +1,61 @@
-import express from 'express';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
-import validator from 'validator';
-import cors from 'cors';
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import validator from "validator";
+import cors from "cors";
 
 const app = express();
 const port = process.env.PORT || 3001;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const rootDir = path.resolve(__dirname, '..');
-const distDir = path.join(rootDir, 'dist');
+const rootDir = path.resolve(__dirname, "..");
+const distDir = path.join(rootDir, "dist");
 
 // ============================================
 // SECURITY MIDDLEWARE
 // ============================================
 
 // 1. Helmet - Security headers
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", "data:", "https:"],
+      },
     },
-  },
-}));
+  }),
+);
 
 // 2. CORS - Only allow specific origins
-const allowedOrigins = [
-  'http://localhost:5173', // Vite dev
-  'http://localhost:3001', // Production
-  // Add your production domain here
-];
+const allowedOrigins = (
+  process.env.ALLOWED_ORIGINS || "http://localhost:5173,http://localhost:3001"
+)
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
-app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (mobile apps, Postman, etc.)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) === -1) {
-      return callback(new Error('CORS policy: Origin not allowed'), false);
-    }
-    return callback(null, true);
-  },
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (mobile apps, Postman, etc.)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.indexOf(origin) === -1) {
+        return callback(new Error("CORS policy: Origin not allowed"), false);
+      }
+      return callback(null, true);
+    },
+    credentials: true,
+  }),
+);
 
 // 3. Request size limit
-app.use(express.json({ limit: '10kb' })); // Max 10KB JSON payload
+app.use(express.json({ limit: "10kb" })); // Max 10KB JSON payload
 
 // 4. Rate limiting - Global
 const globalLimiter = rateLimit({
@@ -58,7 +63,7 @@ const globalLimiter = rateLimit({
   max: 100, // Max 100 requests per 15 minutes
   message: {
     ok: false,
-    message: 'Terlalu banyak request. Coba lagi nanti.',
+    message: "Terlalu banyak request. Coba lagi nanti.",
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -72,7 +77,7 @@ const contactLimiter = rateLimit({
   max: 5, // Max 5 contact submissions per hour
   message: {
     ok: false,
-    message: 'Anda sudah mengirim terlalu banyak pesan. Coba lagi dalam 1 jam.',
+    message: "Anda sudah mengirim terlalu banyak pesan. Coba lagi dalam 1 jam.",
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -84,15 +89,15 @@ const contactLimiter = rateLimit({
 
 // Input sanitization
 function sanitizeInput(input) {
-  if (typeof input !== 'string') return '';
-  
+  if (typeof input !== "string") return "";
+
   // Remove HTML tags
   let sanitized = validator.stripLow(input);
   sanitized = validator.escape(sanitized);
-  
+
   // Trim whitespace
   sanitized = sanitized.trim();
-  
+
   return sanitized;
 }
 
@@ -109,22 +114,22 @@ function isValidEmail(email) {
 // API ROUTES
 // ============================================
 
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    ok: true, 
-    service: 'portfolio-api',
+app.get("/api/health", (req, res) => {
+  res.json({
+    ok: true,
+    service: "portfolio-api",
     timestamp: new Date().toISOString(),
   });
 });
 
-app.post('/api/contact', contactLimiter, (req, res) => {
+app.post("/api/contact", contactLimiter, (req, res) => {
   const { name, email, service, message } = req.body ?? {};
 
   // 1. Check required fields
   if (!name || !email || !message) {
     return res.status(400).json({
       ok: false,
-      message: 'Nama, email, dan pesan wajib diisi.',
+      message: "Nama, email, dan pesan wajib diisi.",
     });
   }
 
@@ -132,28 +137,28 @@ app.post('/api/contact', contactLimiter, (req, res) => {
   if (!isValidEmail(email)) {
     return res.status(400).json({
       ok: false,
-      message: 'Format email tidak valid.',
+      message: "Format email tidak valid.",
     });
   }
 
   // 3. Sanitize inputs
   const sanitizedName = sanitizeInput(name);
   const sanitizedEmail = validator.normalizeEmail(email);
-  const sanitizedService = service ? sanitizeInput(service) : '';
+  const sanitizedService = service ? sanitizeInput(service) : "";
   const sanitizedMessage = sanitizeInput(message);
 
   // 4. Validate length
   if (sanitizedName.length < 2 || sanitizedName.length > 100) {
     return res.status(400).json({
       ok: false,
-      message: 'Nama harus antara 2-100 karakter.',
+      message: "Nama harus antara 2-100 karakter.",
     });
   }
 
   if (sanitizedMessage.length < 10 || sanitizedMessage.length > 1000) {
     return res.status(400).json({
       ok: false,
-      message: 'Pesan harus antara 10-1000 karakter.',
+      message: "Pesan harus antara 10-1000 karakter.",
     });
   }
 
@@ -167,17 +172,17 @@ app.post('/api/contact', contactLimiter, (req, res) => {
   ];
 
   const combinedText = `${sanitizedName} ${sanitizedMessage}`.toLowerCase();
-  const isSpam = spamPatterns.some(pattern => pattern.test(combinedText));
+  const isSpam = spamPatterns.some((pattern) => pattern.test(combinedText));
 
   if (isSpam) {
     return res.status(400).json({
       ok: false,
-      message: 'Pesan terdeteksi sebagai spam.',
+      message: "Pesan terdeteksi sebagai spam.",
     });
   }
 
   // 6. Log the contact (in production, save to database)
-  console.log('[CONTACT FORM]', {
+  console.log("[CONTACT FORM]", {
     name: sanitizedName,
     email: sanitizedEmail,
     service: sanitizedService,
@@ -188,7 +193,8 @@ app.post('/api/contact', contactLimiter, (req, res) => {
   // 7. Success response (don't echo back user input for security)
   return res.json({
     ok: true,
-    message: 'Pesan diterima. Saya akan tindak lanjuti lewat kontak yang Anda kirim.',
+    message:
+      "Pesan diterima. Saya akan tindak lanjuti lewat kontak yang Anda kirim.",
   });
 });
 
@@ -196,10 +202,10 @@ app.post('/api/contact', contactLimiter, (req, res) => {
 // STATIC FILES & SPA ROUTING
 // ============================================
 
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === "production") {
   app.use(express.static(distDir));
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(distDir, 'index.html'));
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(distDir, "index.html"));
   });
 }
 
@@ -211,26 +217,26 @@ if (process.env.NODE_ENV === 'production') {
 app.use((req, res) => {
   res.status(404).json({
     ok: false,
-    message: 'Endpoint tidak ditemukan.',
+    message: "Endpoint tidak ditemukan.",
   });
 });
 
 // Global error handler
 app.use((err, req, res, next) => {
-  console.error('[ERROR]', err);
-  
+  console.error("[ERROR]", err);
+
   // CORS error
-  if (err.message.includes('CORS')) {
+  if (err.message.includes("CORS")) {
     return res.status(403).json({
       ok: false,
-      message: 'Akses ditolak: Origin tidak diizinkan.',
+      message: "Akses ditolak: Origin tidak diizinkan.",
     });
   }
-  
+
   // Generic error
   res.status(500).json({
     ok: false,
-    message: 'Terjadi kesalahan server.',
+    message: "Terjadi kesalahan server.",
   });
 });
 
@@ -240,6 +246,7 @@ app.use((err, req, res, next) => {
 
 app.listen(port, () => {
   console.log(`✅ API server running on http://localhost:${port}`);
+  console.log(`🌍 Allowed origins: ${allowedOrigins.join(", ")}`);
   console.log(`🔒 Security features enabled:`);
   console.log(`   - Helmet (security headers)`);
   console.log(`   - CORS protection`);

@@ -14,14 +14,22 @@ Project portfolio dengan tampilan dark minimal, dibangun menggunakan React, Tail
 ## Tech Stack
 
 ### Frontend
+
 - React 18
 - Vite
 - Tailwind CSS
 
-### Backend
+### Local Backend
+
 - Node.js
 - Express
 - **Security:** Helmet, CORS, Rate Limiting, Validator
+
+### Deployment Options
+
+- Static hosting: Vercel, Netlify, GitHub Pages, Cloudflare Pages, atau hosting statis lain
+- Node.js hosting: Render, Railway, Fly.io, VPS, atau platform apa pun yang mendukung Express
+- API dapat berjalan di origin yang sama atau di domain terpisah lewat environment variable
 
 ## 🔒 Security Features
 
@@ -74,18 +82,14 @@ npm run dev
 ```
 
 - Frontend Vite: `http://localhost:5173`
-- Backend Express: `http://localhost:3001`
+- Backend Express lokal: `http://localhost:3001`
+
+Jika ingin mencoba flow produksi secara lokal, frontend bisa tetap jalan dari Vite, sementara request API diarahkan ke backend Express lokal atau backend eksternal melalui `VITE_API_BASE_URL`.
 
 ### 3. Build production
 
 ```bash
 npm run build
-```
-
-### 4. Jalankan server production
-
-```bash
-npm run start
 ```
 
 ## Script
@@ -94,13 +98,13 @@ npm run start
 - `npm run dev:client` - jalankan Vite saja
 - `npm run dev:server` - jalankan Express saja
 - `npm run build` - build production frontend
-- `npm run start` - jalankan backend Express
+- `npm run start` - jalankan backend Express lokal untuk testing
 
 ## API Endpoint
 
 ### `GET /api/health`
 
-Cek status backend.
+Cek status backend. Endpoint ini tersedia jika backend Express atau serverless API dijalankan.
 
 Contoh respons:
 
@@ -114,7 +118,7 @@ Contoh respons:
 
 ### `POST /api/contact`
 
-Kirim pesan kontak.
+Kirim pesan kontak. Frontend akan memanggil endpoint dari origin yang sama, atau dari `VITE_API_BASE_URL` jika diatur.
 
 **Request Body:**
 
@@ -165,6 +169,7 @@ Kirim pesan kontak.
 ```
 
 **Validation Rules:**
+
 - **Name:** 2-100 characters, required
 - **Email:** Valid email format, required
 - **Message:** 10-1000 characters, required
@@ -201,6 +206,7 @@ Invoke-WebRequest -Uri "http://localhost:3001/api/contact" `
 ## 📦 Dependencies
 
 ### Production
+
 ```json
 {
   "express": "^4.21.2",
@@ -214,6 +220,7 @@ Invoke-WebRequest -Uri "http://localhost:3001/api/contact" `
 ```
 
 ### Development
+
 ```json
 {
   "@vitejs/plugin-react": "^4.3.4",
@@ -228,16 +235,22 @@ Invoke-WebRequest -Uri "http://localhost:3001/api/contact" `
 
 ## 🔧 Configuration
 
-### Add Production Domain
+### Set API Base URL
 
-Edit `server/index.js`:
+Kalau frontend dan backend tidak satu domain, set environment variable berikut saat build frontend:
 
-```javascript
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:3001',
-  'https://yourdomain.com', // Add your production domain
-];
+```env
+VITE_API_BASE_URL=https://api.domain-anda.com/api
+```
+
+Jika tidak diisi, frontend akan memakai `/api/contact` dari domain yang sama.
+
+### Set Allowed Origins untuk Express
+
+Edit environment backend:
+
+```env
+ALLOWED_ORIGINS=http://localhost:5173,https://domain-frontend-anda.com
 ```
 
 ### Adjust Rate Limits
@@ -256,24 +269,32 @@ const contactLimiter = rateLimit({
 
 ## 🚀 Deployment
 
-### Environment Variables
+### Opsi 1: Satu domain
 
-Create `.env` file:
+Build frontend dan jalankan backend pada domain yang sama. Ini paling sederhana karena frontend akan memanggil `/api/contact` langsung.
 
-```env
-PORT=3001
-NODE_ENV=production
-```
+### Opsi 2: Frontend dan backend terpisah
+
+Set `VITE_API_BASE_URL` ke URL backend API, lalu deploy frontend ke static host apa pun.
 
 ### Build & Deploy
 
 ```bash
 # Build frontend
 npm run build
-
-# Start production server
-npm start
 ```
+
+Untuk static hosting, arahkan output build ke folder `dist`.
+
+### Local Production Preview
+
+Kalau ingin menjalankan backend Express secara lokal, gunakan:
+
+```bash
+npm run start
+```
+
+Pastikan frontend mengarah ke backend lokal jika dipakai terpisah. Jika memakai backend terpisah, set `VITE_API_BASE_URL` sebelum build frontend.
 
 ## ⚠️ Security Notes
 
@@ -292,20 +313,7 @@ Jika menemukan bug atau security issue, silakan buat issue di repository ini.
 ---
 
 **Built with ❤️ using React, Node.js, and Tailwind CSS**  
-**Secured with 🔒 7-layer protection**POST /api/contact`
-
-Menerima data form kontak.
-
-Body:
-
-```json
-{
-  "name": "Nama Anda",
-  "email": "email@domain.com",
-  "service": "Web Development",
-  "message": "Pesan Anda"
-}
-```
+**Secured with 🔒 7-layer protection**
 
 ## Catatan
 
