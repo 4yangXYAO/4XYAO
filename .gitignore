@@ -1,7 +1,17 @@
-﻿node_modules/
+﻿# dependencies
+node_modules/
+
+# build output
+.next/
 dist/
-.env
+
+# environment variables
+.env    
 .env.local
+
+# logs
 *.log
+
+# system files
 .DS_Store
 Thumbs.db
