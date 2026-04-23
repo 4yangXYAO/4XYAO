@@ -98,6 +98,7 @@ npm run build
 - `npm run dev:client` - jalankan Vite saja
 - `npm run dev:server` - jalankan Express saja
 - `npm run build` - build production frontend
+- `npm run preview` - preview hasil build frontend secara lokal
 - `npm run start` - jalankan backend Express lokal untuk testing
 
 ## API Endpoint
