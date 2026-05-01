@@ -50,7 +50,11 @@ const services = [
     color: "#16a34a",
     icon: "fas fa-magnifying-glass-chart icon-main",
     desc: "Optimasi mesin pencari dan strategi pemasaran digital untuk meningkatkan visibilitas online bisnis Anda.",
-    perks: ["Coming soon!"],
+    perks: [
+      "Search Engine Optimization",
+      "Social Media Strategy",
+      "Conversion Rate Optimization",
+    ],
     delay: 300,
   },
   {
@@ -58,15 +62,23 @@ const services = [
     color: "#e11d48",
     icon: "fa-solid fa-terminal",
     desc: "Membuat prompt yang efektif untuk menghasilkan konten berkualitas tinggi dengan bantuan kecerdasan buatan.",
-    perks: ["Coming soon!"],
+    perks: [
+      "Creative Content Prompting",
+      "Efficiency Workflow",
+      "Custom AI Solutions",
+    ],
     delay: 400,
   },
   {
-    title: "Automation & Bot",
+    title: "Automation & Blast Engine",
     color: "#db2777",
     icon: "fas fa-robot icon-main",
-    desc: "Pembuatan bot otomatis, bot Telegram, Bot Whatsaap, web scraper, dan sistem automasi untuk efisiensi bisnis Anda",
-    perks: ["Coming soon!"],
+    desc: "Sistem pengiriman pesan masal (blast) ke berbagai platform media sosial dengan manajemen kampanye dan tracking link yang akurat.",
+    perks: [
+      "Multi-platform (WA, TG, FB, IG)",
+      "Inbound Auto-Reply",
+      "Link Tracking & Analytics",
+    ],
     delay: 500,
   },
   {
@@ -114,9 +126,14 @@ const skills = [
 const works = [
   { type: "Portofolio", title: "About We", icon: "fas fa-globe" },
   {
-    type: "Jhasil Kerja Kami",
+    type: "Hasil Kerja Kami",
     title: "Project Showcase",
     icon: "fas fa-mobile-screen-button",
+  },
+  {
+    type: "Fullstack Tool",
+    title: "Joki Blast Engine",
+    icon: "fas fa-rocket",
   },
 ];
 
@@ -835,7 +852,7 @@ export default function App() {
                   <option>Mobile App</option>
                   <option>SEO & Digital Marketing</option>
                   <option>Video Editing</option>
-                  <option>Automation & Bot</option>
+                  <option>Automation & Blast Engine</option>
                   <option>Copy Writer</option>
                   <option>Photo Editing</option>
                   <option>AI Prompt</option>
